@@ -3,202 +3,560 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Journey • Oil Finder (Google Sheet)</title>
+<title>Journey • Oil Finder</title>
 <style>
   :root { --slate:#324558; --magenta:#cc0067; --beige:#f7f4f1; --ink:#222; }
   * { box-sizing: border-box; }
-  body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; background: var(--beige); color: var(--ink); }
-  header { padding: 28px 20px 8px; text-align:center; }
-  h1 { margin:0; color:var(--slate); font-size: 28px; letter-spacing: .2px; }
-  .tagline { color:var(--magenta); margin-top:6px; font-weight:600; }
-  .config { font-size:12px; color:#666; text-align:center; margin: 6px 0 0; }
-  .bar { display:flex; gap:10px; padding: 12px 16px; flex-wrap: wrap; justify-content:center; }
+  body {
+    margin:0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    background: var(--beige);
+    color: var(--ink);
+  }
+  header {
+    padding: 24px 16px 8px;
+    text-align:center;
+  }
+  h1 {
+    margin:0;
+    color:var(--slate);
+    font-size: 26px;
+    letter-spacing: .2px;
+  }
+  .tagline {
+    color:var(--magenta);
+    margin-top:4px;
+    font-weight:600;
+    font-size: 13px;
+  }
+
+  /* Nav tabs */
+  .tabs {
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    padding: 10px 16px 4px;
+    flex-wrap:wrap;
+  }
+  .tab-btn {
+    padding:8px 14px;
+    border-radius:999px;
+    border:1px solid var(--slate);
+    background:#fff;
+    color:var(--slate);
+    font-size:13px;
+    cursor:pointer;
+  }
+  .tab-btn.active {
+    background:var(--slate);
+    color:#fff;
+  }
+
+  .bar {
+    display:flex;
+    gap:10px;
+    padding: 10px 16px;
+    flex-wrap: wrap;
+    justify-content:center;
+  }
   .search { flex:1 1 260px; max-width:520px; }
-  .search input { width:100%; padding:12px 14px; border:1px solid #dcd7d2; border-radius:12px; font-size:14px; background:white; outline-color: var(--slate); }
-  .filters { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
-  .chip { padding:8px 12px; border-radius:999px; border:1px solid var(--slate); color:var(--slate); cursor:pointer; background:#fff; user-select:none; }
-  .chip.active { background: var(--slate); color:#fff; }
-  main { max-width:1100px; margin: 0 auto; padding: 8px 16px 32px; }
-  .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:14px; }
-  .card { background:#fff; border:1px solid #e9e4df; border-radius:16px; padding:16px; box-shadow: 0 1px 4px rgba(50,69,88,.06); }
-  .name { font-weight:700; color:var(--magenta); margin:0 0 6px; font-size:16px; }
-  .cat { font-size:12px; color:var(--slate); margin-bottom:8px; }
-  .line { font-size:13px; margin:4px 0; }
+  .search input {
+    width:100%;
+    padding:10px 14px;
+    border:1px solid #dcd7d2;
+    border-radius:12px;
+    font-size:14px;
+    background:white;
+    outline-color: var(--slate);
+  }
+  .filters {
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .chip {
+    padding:6px 11px;
+    border-radius:999px;
+    border:1px solid var(--slate);
+    color:var(--slate);
+    cursor:pointer;
+    background:#fff;
+    user-select:none;
+    font-size:12px;
+  }
+  .chip.active {
+    background: var(--slate);
+    color:#fff;
+  }
+
+  main {
+    max-width:1100px;
+    margin: 0 auto;
+    padding: 8px 16px 32px;
+  }
+
+  .howto {
+    max-width: 920px;
+    margin: 8px auto 16px;
+    font-size:12px;
+    color:#555;
+    padding: 0 16px;
+    text-align:center;
+  }
+  .pill {
+    display:inline-block;
+    padding:2px 8px;
+    border-radius: 999px;
+    background:#fff;
+    border:1px solid #e1dcd7;
+    font-size:11px;
+    color:#444;
+    margin-right:4px;
+  }
+
+  /* Sections */
+  .section {
+    display:none;
+  }
+  .section.active {
+    display:block;
+  }
+
+  /* Oil Finder grid */
+  .grid {
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px,1fr));
+    gap:14px;
+  }
+  .card {
+    background:#fff;
+    border:1px solid #e9e4df;
+    border-radius:16px;
+    padding:14px;
+    box-shadow: 0 1px 4px rgba(50,69,88,.06);
+  }
+  .name {
+    font-weight:700;
+    color:var(--magenta);
+    margin:0 0 6px;
+    font-size:16px;
+  }
+  .cat {
+    font-size:12px;
+    color:var(--slate);
+    margin-bottom:6px;
+  }
+  .line {
+    font-size:13px;
+    margin:3px 0;
+  }
   .muted { color:#666; }
-  footer { text-align:center; padding: 18px 12px 32px; color:#666; font-size:13px; }
-  .howto { max-width: 920px; margin: 8px auto 16px; font-size:12px; color:#555; padding: 0 16px; text-align:center; }
-  .pill { display:inline-block; padding:2px 8px; border-radius: 999px; background:#fff; border:1px solid #e1dcd7; font-size:11px; color:#444; }
-  .status { font-size:12px; color:#666; text-align:center; margin-top:6px; }
+
+  .status {
+    font-size:12px;
+    color:#666;
+    text-align:center;
+    margin-top:10px;
+  }
+
+  /* Guide + Class Info cards */
+  .guide-block {
+    background:#fff;
+    border-radius:16px;
+    border:1px solid #e3ddd7;
+    padding:16px;
+    margin-bottom:14px;
+    box-shadow: 0 1px 4px rgba(50,69,88,.04);
+  }
+  .guide-title {
+    font-size:15px;
+    font-weight:600;
+    color:var(--slate);
+    margin-bottom:6px;
+  }
+  .guide-text {
+    font-size:13px;
+    color:#333;
+    margin:4px 0;
+  }
+  .guide-list {
+    margin:6px 0 4px 18px;
+    font-size:13px;
+  }
+
+  footer {
+    text-align:center;
+    padding: 16px 12px 26px;
+    color:#666;
+    font-size:12px;
+  }
 </style>
 </head>
 <body>
   <header>
     <h1>Journey Oil Finder</h1>
     <div class="tagline">Grow Through It</div>
-    <div class="config" id="configHint">Configure your Google Sheet URL below.</div>
   </header>
 
-  <div class="bar">
-    <div class="search"><input id="q" placeholder="Search oils or benefits… (e.g., 'hydrating', 'oily skin')" /></div>
-    <div class="filters">
-      <div class="chip active" data-cat="All">All</div>
-      <div class="chip" data-cat="Dry Skin">Dry Skin</div>
-      <div class="chip" data-cat="Oily Skin">Oily Skin</div>
-      <div class="chip" data-cat="Sensitive Skin">Sensitive Skin</div>
-      <div class="chip" data-cat="Mature Skin">Mature Skin</div>
-      <div class="chip" data-cat="All Skin Types">All Skin Types</div>
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="finder">Oil Finder</button>
+    <button class="tab-btn" data-tab="guide">Blending Guide</button>
+    <button class="tab-btn" data-tab="info">Class Info</button>
+  </div>
+
+  <!-- Oil Finder Section -->
+  <section id="finder" class="section active">
+    <div class="bar">
+      <div class="search">
+        <input id="q" placeholder="Search oils or benefits… (e.g., 'hydrating', 'oily skin')" />
+      </div>
+      <div class="filters">
+        <div class="chip active" data-cat="All">All</div>
+        <div class="chip" data-cat="Dry Skin">Dry Skin</div>
+        <div class="chip" data-cat="Oily Skin">Oily Skin</div>
+        <div class="chip" data-cat="Sensitive Skin">Sensitive Skin</div>
+        <div class="chip" data-cat="Mature Skin">Mature Skin</div>
+        <div class="chip" data-cat="All Skin Types">All Skin Types</div>
+      </div>
     </div>
-  </div>
 
-  <div class="howto">
-    <span class="pill">Tip</span> This page reads from your Google Sheet (published CSV). Update your sheet and refresh to see changes. Keep your blend under <strong>15%</strong> total oils.
-  </div>
+    <div class="howto">
+      <span class="pill">Tip</span>
+      Filter by skin type or search words like “redness”, “lightweight”, or “hydrating”.
+      Use your worksheet to jot down favorites and keep your blend under <strong>15%</strong> total oils.
+    </div>
 
-  <main>
-    <div id="grid" class="grid"></div>
-    <div class="status" id="status"></div>
-  </main>
+    <main>
+      <div id="grid" class="grid"></div>
+      <div id="status" class="status"></div>
+    </main>
+  </section>
+
+  <!-- Blending Guide Section -->
+  <section id="guide" class="section">
+    <main>
+      <div class="guide-block">
+        <div class="guide-title">How the 15% Oil Limit Works</div>
+        <p class="guide-text">
+          In this class, you can use up to <strong>15%</strong> liquid oils in your body butter formula.
+          The rest is butters, base ingredients, and fragrance.
+        </p>
+        <ul class="guide-list">
+          <li>Think of 15% as your “oil budget”.</li>
+          <li>Every oil you pick spends a little of that budget.</li>
+          <li>Use your worksheet to add up your chosen percentages until you reach (or stay under) 15%.</li>
+        </ul>
+      </div>
+
+      <!-- This container will be filled from the Blends sheet -->
+      <div id="blendsContainer"></div>
+
+      <div class="guide-block">
+        <div class="guide-title">Tips While You Create</div>
+        <ul class="guide-list">
+          <li>Start with <strong>2–3 oils</strong> instead of many — simple formulas are easier to repeat.</li>
+          <li>Circle your favorite oils in the Oil Finder, then plug them into your worksheet.</li>
+          <li>Notice how different textures feel: some are light and dry-touch, others rich and cushiony.</li>
+          <li>Your blend should feel like <strong>you</strong> — there is no one “perfect” recipe.</li>
+        </ul>
+      </div>
+    </main>
+  </section>
+
+  <!-- Class Info Section -->
+  <section id="info" class="section">
+    <main>
+      <!-- This container will be filled from the ClassInfo sheet -->
+      <div id="classInfoContainer"></div>
+    </main>
+  </section>
 
   <footer>© Journey — Body Butter Workshop</footer>
 
 <script>
-// ======== CONFIG ========
-// 1) In Google Sheets: File → Share → Publish to web → Entire sheet → CSV → Publish
-// 2) Copy the CSV link and paste it below as SHEET_CSV_URL
-const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS_9_01kDCEfIsd93-SJlQ9Gy4M2HxDQbWlaCH0Z3YE76YI3jLy18F1p0jEHm2RItyNnavp8gZK9Y9o/pub?output=csv";
+  // ======== CONFIG FOR GOOGLE SHEETS ========
+  // 1) In Google Sheets: File → Share → Publish to web → CSV
+  // 2) Use the specific tab for each:
+  const SHEET_OILS_CSV_URL      = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS_9_01kDCEfIsd93-SJlQ9Gy4M2HxDQbWlaCH0Z3YE76YI3jLy18F1p0jEHm2RItyNnavp8gZK9Y9o/pub?gid=497445857&single=true&output=csv";
+  const SHEET_BLENDS_CSV_URL    = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS_9_01kDCEfIsd93-SJlQ9Gy4M2HxDQbWlaCH0Z3YE76YI3jLy18F1p0jEHm2RItyNnavp8gZK9Y9o/pub?gid=1771032100&single=true&output=csv";
+  const SHEET_CLASSINFO_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS_9_01kDCEfIsd93-SJlQ9Gy4M2HxDQbWlaCH0Z3YE76YI3jLy18F1p0jEHm2RItyNnavp8gZK9Y9o/pub?gid=1376926094&single=true&output=csv";
 
-// (Optional) If your column headers differ, adjust the mapping here:
-const COLS = {
-  name: "Oil Name",
-  category: "Skin Benefit Category",
-  benefits: "Plain-English Benefits",
-  notes: "Notes",
-  recommended: "Recommended % Range"
-};
-// ========================
+  const COLS_OILS = {
+    name: "Oil Name",
+    category: "Skin Benefit Category",
+    benefits: "Plain-English Benefits",
+    notes: "Notes",
+    recommended: "Recommended % Range"
+  };
 
-// Tiny CSV parser that handles quotes and commas in fields
-function parseCSV(text) {
-  const rows = [];
-  let row = [];
-  let i = 0, field = "", inQuotes = false;
+  const COLS_BLENDS = {
+    skinType: "Skin Type",
+    title: "Display Title",
+    bullet1: "Bullet 1",
+    bullet2: "Bullet 2",
+    bullet3: "Bullet 3"
+  };
 
-  while (i < text.length) {
-    const c = text[i];
+  const COLS_INFO = {
+    title: "Block Title",
+    p1: "Paragraph 1",
+    p2: "Paragraph 2",
+    li1: "List Item 1",
+    li2: "List Item 2",
+    li3: "List Item 3",
+    li4: "List Item 4"
+  };
+  // ==========================================
 
-    if (inQuotes) {
-      if (c === '"') {
-        if (text[i+1] === '"') { field += '"'; i++; }
-        else { inQuotes = false; }
+  // Tabs
+  const tabButtons = Array.from(document.querySelectorAll(".tab-btn"));
+  const sections = {
+    finder: document.getElementById("finder"),
+    guide: document.getElementById("guide"),
+    info: document.getElementById("info")
+  };
+
+  tabButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      tabButtons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const tab = btn.dataset.tab;
+      Object.keys(sections).forEach(key => {
+        sections[key].classList.toggle("active", key === tab);
+      });
+    });
+  });
+
+  // Shared CSV parser
+  function parseCSV(text) {
+    const rows = [];
+    let row = [];
+    let i = 0, field = "", inQuotes = false;
+
+    while (i < text.length) {
+      const c = text[i];
+
+      if (inQuotes) {
+        if (c === '"') {
+          if (text[i+1] === '"') { field += '"'; i++; }
+          else { inQuotes = false; }
+        } else {
+          field += c;
+        }
       } else {
-        field += c;
+        if (c === '"') inQuotes = true;
+        else if (c === ',') { row.push(field); field = ""; }
+        else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ""; }
+        else if (c === '\r') { /* ignore */ }
+        else { field += c; }
       }
-    } else {
-      if (c === '"') inQuotes = true;
-      else if (c === ',') { row.push(field); field = ""; }
-      else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ""; }
-      else if (c === '\r') { /* ignore */ }
-      else { field += c; }
+      i++;
     }
-    i++;
+    if (field.length || row.length) { row.push(field); rows.push(row); }
+    return rows;
   }
-  if (field.length || row.length) { row.push(field); rows.push(row); }
-  return rows;
-}
 
-function csvToObjects(csv) {
-  const rows = parseCSV(csv);
-  if (!rows.length) return [];
-  const headers = rows[0].map(h => h.trim());
-  return rows.slice(1).filter(r => r.some(v => v && v.trim())).map(r => {
-    const o = {};
-    headers.forEach((h, idx) => { o[h] = r[idx] || ""; });
-    return o;
-  });
-}
-
-const grid = document.getElementById('grid');
-const q = document.getElementById('q');
-const chips = Array.from(document.querySelectorAll('.chip'));
-const statusEl = document.getElementById('status');
-const configHint = document.getElementById('configHint');
-
-let DATA = [];
-let currentCat = 'All';
-let currentQuery = '';
-
-function render(items) {
-  grid.innerHTML = '';
-  items.forEach(o => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    const name = o[COLS.name] || '';
-    const cat = o[COLS.category] || 'All Skin Types';
-    const ben = o[COLS.benefits] || '';
-    const notes = o[COLS.notes] || '';
-    const rec = o[COLS.recommended] || '2–5%';
-    card.innerHTML = `
-      <div class="name">${name}</div>
-      <div class="cat">${cat}</div>
-      <div class="line"><strong>Key Benefits:</strong> ${ben || '—'}</div>
-      <div class="line muted"><strong>Notes:</strong> ${notes || '—'}</div>
-      <div class="line"><strong>Recommended %:</strong> ${rec} (class cap: 15%)</div>
-    `;
-    grid.appendChild(card);
-  });
-}
-
-function applyFilters() {
-  const qx = currentQuery.trim().toLowerCase();
-  const filtered = DATA.filter(o => {
-    const cat = (o[COLS.category] || 'All Skin Types');
-    const catOk = (currentCat === 'All') || (cat === currentCat);
-    const text = (
-      (o[COLS.name]||'') + ' ' +
-      (o[COLS.category]||'') + ' ' +
-      (o[COLS.benefits]||'') + ' ' +
-      (o[COLS.notes]||'')
-    ).toLowerCase();
-    const qOk = !qx || text.includes(qx);
-    return catOk && qOk;
-  });
-  render(filtered);
-}
-
-chips.forEach(c => c.addEventListener('click', () => {
-  chips.forEach(x => x.classList.remove('active'));
-  c.classList.add('active');
-  currentCat = c.dataset.cat;
-  applyFilters();
-}));
-
-q.addEventListener('input', (e) => {
-  currentQuery = e.target.value;
-  applyFilters();
-});
-
-async function loadSheet() {
-  if (!SHEET_CSV_URL || SHEET_CSV_URL.includes("PASTE_GOOGLE_SHEET")) {
-    configHint.textContent = "Add your Google Sheet published CSV URL where indicated in the code.";
-    statusEl.textContent = "";
-    return;
+  function csvToObjects(csv) {
+    const rows = parseCSV(csv);
+    if (!rows.length) return [];
+    const headers = rows[0].map(h => h.trim());
+    return rows.slice(1)
+      .filter(r => r.some(v => v && v.trim()))
+      .map(r => {
+        const o = {};
+        headers.forEach((h, idx) => { o[h] = r[idx] || ""; });
+        return o;
+      });
   }
-  configHint.textContent = "";
-  statusEl.textContent = "Loading from Google Sheet…";
-  try {
-    const res = await fetch(SHEET_CSV_URL);
-    if (!res.ok) throw new Error("Fetch failed");
-    const csv = await res.text();
-    DATA = csvToObjects(csv);
-    statusEl.textContent = `Loaded ${DATA.length} oils from your sheet.`;
-    applyFilters();
-  } catch (e) {
-    statusEl.textContent = "Could not load the sheet. Check that it is published to the web as CSV and the link is correct.";
-  }
-}
 
-// Init
-loadSheet();
+  // Oil Finder
+  const grid = document.getElementById('grid');
+  const q = document.getElementById('q');
+  const chips = Array.from(document.querySelectorAll('.chip'));
+  const statusEl = document.getElementById('status');
+
+  let DATA_OILS = [];
+  let currentCat = 'All';
+  let currentQuery = '';
+
+  function renderOils(items) {
+    grid.innerHTML = '';
+    items.forEach(o => {
+      const name = o[COLS_OILS.name] || '';
+      const cat = o[COLS_OILS.category] || 'All Skin Types';
+      const ben = o[COLS_OILS.benefits] || '';
+      const notes = o[COLS_OILS.notes] || '';
+      const rec = o[COLS_OILS.recommended] || '2–5%';
+
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="name">${name}</div>
+        <div class="cat">${cat}</div>
+        <div class="line"><strong>Key Benefits:</strong> ${ben || '—'}</div>
+        <div class="line muted"><strong>Notes:</strong> ${notes || '—'}</div>
+        <div class="line"><strong>Recommended %:</strong> ${rec} (class cap: 15%)</div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function applyOilFilters() {
+    const qx = currentQuery.trim().toLowerCase();
+    const filtered = DATA_OILS.filter(o => {
+      const cat = (o[COLS_OILS.category] || 'All Skin Types');
+      const catOk = (currentCat === 'All') || (cat === currentCat);
+      const text = (
+        (o[COLS_OILS.name]||'') + ' ' +
+        (o[COLS_OILS.category]||'') + ' ' +
+        (o[COLS_OILS.benefits]||'') + ' ' +
+        (o[COLS_OILS.notes]||'')
+      ).toLowerCase();
+      const qOk = !qx || text.includes(qx);
+      return catOk && qOk;
+    });
+    renderOils(filtered);
+  }
+
+  chips.forEach(c => c.addEventListener('click', () => {
+    chips.forEach(x => x.classList.remove('active'));
+    c.classList.add('active');
+    currentCat = c.dataset.cat;
+    applyOilFilters();
+  }));
+
+  if (q) {
+    q.addEventListener('input', (e) => {
+      currentQuery = e.target.value;
+      applyOilFilters();
+    });
+  }
+
+  async function loadOils() {
+    if (!SHEET_OILS_CSV_URL || SHEET_OILS_CSV_URL.includes("PASTE_OILS")) {
+      statusEl.textContent = "Add your Oils sheet CSV URL in the code.";
+      return;
+    }
+    statusEl.textContent = "Loading oils from Google Sheet…";
+    try {
+      const res = await fetch(SHEET_OILS_CSV_URL);
+      if (!res.ok) throw new Error("Fetch failed");
+      const csv = await res.text();
+      DATA_OILS = csvToObjects(csv);
+      statusEl.textContent = `Loaded ${DATA_OILS.length} oils from your sheet.`;
+      applyOilFilters();
+    } catch (e) {
+      statusEl.textContent = "Could not load oils. Check that your Oils sheet is published as CSV and the link is correct.";
+    }
+  }
+
+  // Blends
+  const blendsContainer = document.getElementById('blendsContainer');
+  let DATA_BLENDS = [];
+
+  function renderBlends(items) {
+    blendsContainer.innerHTML = '';
+    items.forEach(o => {
+      const title = o[COLS_BLENDS.title] || o[COLS_BLENDS.skinType] || '';
+      const b1 = o[COLS_BLENDS.bullet1] || '';
+      const b2 = o[COLS_BLENDS.bullet2] || '';
+      const b3 = o[COLS_BLENDS.bullet3] || '';
+
+      const block = document.createElement('div');
+      block.className = 'guide-block';
+
+      let listHTML = '';
+      const bullets = [b1,b2,b3].filter(Boolean);
+      if (bullets.length) {
+        listHTML = '<ul class="guide-list">' +
+          bullets.map(b => `<li>${b}</li>`).join('') +
+          '</ul>';
+      }
+
+      block.innerHTML = `
+        <div class="guide-title">${title}</div>
+        ${listHTML}
+      `;
+      blendsContainer.appendChild(block);
+    });
+  }
+
+  async function loadBlends() {
+    if (!SHEET_BLENDS_CSV_URL || SHEET_BLENDS_CSV_URL.includes("PASTE_BLENDS")) {
+      // optional: leave empty silently
+      return;
+    }
+    try {
+      const res = await fetch(SHEET_BLENDS_CSV_URL);
+      if (!res.ok) throw new Error("Fetch failed");
+      const csv = await res.text();
+      DATA_BLENDS = csvToObjects(csv);
+      renderBlends(DATA_BLENDS);
+    } catch (e) {
+      console.warn("Could not load blends sheet", e);
+    }
+  }
+
+  // Class Info
+  const classInfoContainer = document.getElementById('classInfoContainer');
+  let DATA_INFO = [];
+
+  function renderClassInfo(items) {
+    classInfoContainer.innerHTML = '';
+    items.forEach(o => {
+      const title = o[COLS_INFO.title] || '';
+      const p1 = o[COLS_INFO.p1] || '';
+      const p2 = o[COLS_INFO.p2] || '';
+      const li1 = o[COLS_INFO.li1] || '';
+      const li2 = o[COLS_INFO.li2] || '';
+      const li3 = o[COLS_INFO.li3] || '';
+      const li4 = o[COLS_INFO.li4] || '';
+
+      const block = document.createElement('div');
+      block.className = 'guide-block';
+
+      let paragraphs = '';
+      if (p1) paragraphs += `<p class="guide-text">${p1}</p>`;
+      if (p2) paragraphs += `<p class="guide-text">${p2}</p>`;
+
+      const listItems = [li1,li2,li3,li4].filter(Boolean);
+      let listHTML = '';
+      if (listItems.length) {
+        listHTML = '<ul class="guide-list">' +
+          listItems.map(b => `<li>${b}</li>`).join('') +
+          '</ul>';
+      }
+
+      block.innerHTML = `
+        <div class="guide-title">${title}</div>
+        ${paragraphs}
+        ${listHTML}
+      `;
+      classInfoContainer.appendChild(block);
+    });
+  }
+
+  async function loadClassInfo() {
+    if (!SHEET_CLASSINFO_CSV_URL || SHEET_CLASSINFO_CSV_URL.includes("PASTE_CLASSINFO")) {
+      return;
+    }
+    try {
+      const res = await fetch(SHEET_CLASSINFO_CSV_URL);
+      if (!res.ok) throw new Error("Fetch failed");
+      const csv = await res.text();
+      DATA_INFO = csvToObjects(csv);
+      renderClassInfo(DATA_INFO);
+    } catch (e) {
+      console.warn("Could not load ClassInfo sheet", e);
+    }
+  }
+
+  // Load everything
+  loadOils();
+  loadBlends();
+  loadClassInfo();
 </script>
 </body>
 </html>
